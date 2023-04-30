@@ -19,11 +19,15 @@ public class Character : MonoBehaviour
     private NavMeshAgent _navMeshAgent;
     private Transform TargetPlayer;
 
+    public enum CharacterState { Normal, Attacking };
+
+    public CharacterState currentState;
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
         _cc = GetComponent<CharacterController>();
-        
+
         if (!isPlayer)
         {
             _navMeshAgent = GetComponent<NavMeshAgent>();
@@ -53,6 +57,12 @@ public class Character : MonoBehaviour
 
     public void CalculatePlayerMovement()
     {
+        if(_playerInput.MouseButtonDown && _cc.isGrounded)
+        {
+            SwitchState(CharacterState.Attacking);
+            return;
+        }
+
         _movementVelocity.Set(_playerInput.HorizontalInput, 0f, _playerInput.VerticalInput);
         _movementVelocity.Normalize();
         _movementVelocity = Quaternion.Euler(0, -45f, 0) * _movementVelocity;
@@ -68,25 +78,56 @@ public class Character : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (isPlayer)
+        switch (currentState)
         {
-            CalculatePlayerMovement();
-            if (_cc.isGrounded == false)
-                _verticalVelocity = _gravity;
-            else
-                _verticalVelocity = _gravity * 0.3f;
+            case CharacterState.Normal:
+                if (isPlayer)
+                {
+                    CalculatePlayerMovement();
+                    if (_cc.isGrounded == false)
+                        _verticalVelocity = _gravity;
+                    else
+                        _verticalVelocity = _gravity * 0.3f;
 
-            _movementVelocity += _verticalVelocity * Vector3.up * Time.deltaTime;
-            _cc.Move(_movementVelocity);
+                    _movementVelocity += _verticalVelocity * Vector3.up * Time.deltaTime;
+                    _cc.Move(_movementVelocity);
 
+                }
+                else
+                {
+                    CalculateEnemyMovement();
+                }
+                break;
+            case CharacterState.Attacking:
+                break;
         }
-        else
+
+    }
+
+    public void SwitchState(CharacterState newState)
+    {
+        _playerInput.MouseButtonDown = false;
+
+        //exiting state
+        switch (currentState)
         {
-            CalculateEnemyMovement();
+            case CharacterState.Normal:
+                break;
+            case CharacterState.Attacking:
+                break;
         }
 
-      
+        //entering state
+        switch (newState)
+        {
+            case CharacterState.Normal:
+                break;
+            case CharacterState.Attacking:
+                break;
+        }
 
+        currentState = newState;
+        Debug.Log("SwitchState to + " + currentState);
     }
 
 }

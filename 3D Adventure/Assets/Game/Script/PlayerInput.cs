@@ -4,18 +4,25 @@ using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
-    public float HorizontalInput, VerticalInput;    
+    public float HorizontalInput, VerticalInput;
+    public bool MouseButtonDown;
 
     // Update is called once per frame
     void Update()
     {
+        if(!MouseButtonDown && Time.timeScale != 0)
+        {
+            MouseButtonDown = Input.GetMouseButtonDown(0);
+        }
         HorizontalInput = Input.GetAxisRaw("Horizontal");
-        VerticalInput = Input.GetAxisRaw("Vertical");        
+        VerticalInput = Input.GetAxisRaw("Vertical");
+        
     }
 
     private void OnDisable()
     {
         HorizontalInput = 0;
         VerticalInput = 0;
+        MouseButtonDown = false;
     }
 }
